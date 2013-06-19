@@ -128,10 +128,10 @@ function serviceTable($nagios, $services, $select = false, $type = false) {
 
 function sectionHeader($type, $counter) {
     print(sprintf('<div id="%s" class="section">', $type));
-    print(sprintf('<h2 class="title">%s Status</h2>', ucfirst($type)));
+    print(sprintf('<h2 class="title">%s Status</h2>', ucfirst(str_replace("_", " ", $type))));
     print('<div class="stats">');
     foreach($counter[$type] as $type => $value) {
-        print(sprintf('<div class="stat %s">%s %s</div>', $type, $value, ucfirst($type)));
+        print(sprintf('<div class="stat %s">%s %s</div>', $type, $value, ucfirst(str_replace("_", " ", $type))));
     }
     print('</div></div>');
 }
@@ -242,7 +242,8 @@ foreach (array_keys($status) as $type) {
 			}
 
             if ((int)$service['scheduled_downtime_depth'] > 0) {
-                continue;
+                $counter['services']['scheduled_downtime']++;
+                $states['services']['scheduled_downtime'][] = $service;
             } else if ($service['problem_has_been_acknowledged'] == '1') {
                 $counter['services']['acknowledged']++;
                 $states['services']['acknowledged'][] = $service;
@@ -299,6 +300,10 @@ if($nagliteHeading) {
     echo '<h1>'.$nagliteHeading.'</h1>';
 }
 
+
+############################################################################################
+# Hosts section
+############################################################################################
 sectionHeader('hosts', $counter);
 
 if ($counter['hosts']['down']) {
@@ -318,12 +323,15 @@ if ($counter['hosts']['down']) {
 	echo "<div class='state up'>ALL MONITORED HOSTS UP</div>\n";
 }
 
-foreach(array('unreachable', 'acknowledged', 'pending', 'notification') as $type) {
+foreach(array('unreachable', 'acknowledged', 'pending', 'notification', 'scheduled_downtime') as $type) {
     if ($counter['hosts'][$type]) {
-        print(sprintf('<div class="subhosts %s"><b>%s:</b> %s</div>', $type, ucfirst($type), implode(', ', $states['hosts'][$type])));
+        print(sprintf('<div class="subhosts %s"><b>%s:</b> %s</div>', $type, ucfirst(str_replace("_", " ", $type)), implode(', ', $states['hosts'][$type])));
     }
 }
 
+############################################################################################
+# Services section
+############################################################################################
 sectionHeader('services', $counter);
 
 if ($counter['services']['warning'] || $counter['services']['critical'] || $counter['services']['unknown']) {
@@ -332,9 +340,9 @@ if ($counter['services']['warning'] || $counter['services']['critical'] || $coun
 	print("<div class='state up'>ALL MONITORED SERVICES OK</div>\n");
 }
 
-foreach(array('acknowledged', 'notification', 'pending') as $type) {
+foreach(array('acknowledged', 'scheduled_downtime', 'notification', 'pending') as $type) {
     if ($counter['services'][$type]) {
-        print(sprintf('<h3 class="title">%s</h3>', ucfirst($type)));
+        print(sprintf('<h3 class="title">%s</h3>', ucfirst(str_replace("_", " ", $type))));
         print('<div class="subsection">');
         serviceTable($nagios, $states['services'], array($type), $type);
         print('</div>');

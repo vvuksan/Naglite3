@@ -95,6 +95,7 @@ div.state {
 .pending { background-color: #488acf; }
 .unknown { background-color: #00ffff; }
 .notification { background-color: #69b3b3; }
+.scheduled_downtime { background-color: #cc66cc; }
 .acknowledged { background-color: #d3d3d3; }
 .unreachable { background-color: orange; }
 
